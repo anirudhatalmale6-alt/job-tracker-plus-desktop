@@ -49,7 +49,7 @@ export function StatsCards({ jobs, jobCount, paidJobCount, statusFilter, onStatu
           <div className="p-2 rounded-lg bg-primary/10">
             <Briefcase className="w-5 h-5 text-primary" />
           </div>
-          <div>
+          <div className="min-w-0">
             <p className="text-sm text-muted-foreground">Totalt jobb</p>
             <p className="text-xl font-bold">{jobCount}</p>
           </div>
@@ -61,7 +61,7 @@ export function StatsCards({ jobs, jobCount, paidJobCount, statusFilter, onStatu
           <div className="p-2 rounded-lg bg-success/10">
             <CheckCircle2 className="w-5 h-5 text-success" />
           </div>
-          <div>
+          <div className="min-w-0">
             <p className="text-sm text-muted-foreground">Betalda jobb</p>
             <p className="text-xl font-bold text-success">{paidJobCount}</p>
           </div>
@@ -73,9 +73,9 @@ export function StatsCards({ jobs, jobCount, paidJobCount, statusFilter, onStatu
           <div className="p-2 rounded-lg bg-primary/10">
             <Briefcase className="w-5 h-5 text-primary" />
           </div>
-          <div>
+          <div className="min-w-0">
             <p className="text-sm text-muted-foreground">Totalt värde</p>
-            <p className="text-lg font-bold truncate" title={formatMultiCurrency((t) => t.total)}>
+            <p className="text-base font-bold truncate" title={formatMultiCurrency((t) => t.total)}>
               {formatMultiCurrency((t) => t.total)}
             </p>
           </div>
@@ -87,9 +87,9 @@ export function StatsCards({ jobs, jobCount, paidJobCount, statusFilter, onStatu
           <div className="p-2 rounded-lg bg-muted">
             <Clock className="w-5 h-5 text-muted-foreground" />
           </div>
-          <div>
+          <div className="min-w-0">
             <p className="text-sm text-muted-foreground">Obetalt</p>
-            <p className="text-lg font-bold truncate" title={formatMultiCurrency((t) => t.unpaid)}>
+            <p className="text-base font-bold truncate" title={formatMultiCurrency((t) => t.unpaid)}>
               {formatMultiCurrency((t) => t.unpaid)}
             </p>
           </div>
@@ -101,9 +101,9 @@ export function StatsCards({ jobs, jobCount, paidJobCount, statusFilter, onStatu
           <div className="p-2 rounded-lg bg-primary/10">
             <FileText className="w-5 h-5 text-primary" />
           </div>
-          <div>
+          <div className="min-w-0">
             <p className="text-sm text-muted-foreground">Fakturerat</p>
-            <p className="text-lg font-bold text-primary truncate" title={formatMultiCurrency((t) => t.invoiced)}>
+            <p className="text-base font-bold text-primary truncate" title={formatMultiCurrency((t) => t.invoiced)}>
               {formatMultiCurrency((t) => t.invoiced)}
             </p>
           </div>
@@ -115,9 +115,9 @@ export function StatsCards({ jobs, jobCount, paidJobCount, statusFilter, onStatu
           <div className="p-2 rounded-lg bg-success/10">
             <CheckCircle2 className="w-5 h-5 text-success" />
           </div>
-          <div>
+          <div className="min-w-0">
             <p className="text-sm text-muted-foreground">Betalt värde</p>
-            <p className="text-lg font-bold text-success truncate" title={formatMultiCurrency((t) => t.paid)}>
+            <p className="text-base font-bold text-success truncate" title={formatMultiCurrency((t) => t.paid)}>
               {formatMultiCurrency((t) => t.paid)}
             </p>
           </div>

@@ -131,7 +131,7 @@ export function MonthlySummary({ jobs, selectedYear }: MonthlySummaryProps) {
                         {monthCurrencies.map((cur) => {
                           const d = monthData[cur];
                           return (
-                            <div key={cur} className="text-xs">
+                            <div key={cur} className="text-xs break-words">
                               {d.invoiced > 0 && (
                                 <p className="font-semibold text-primary">{formatCurrency(d.invoiced, cur)}</p>
                               )}
