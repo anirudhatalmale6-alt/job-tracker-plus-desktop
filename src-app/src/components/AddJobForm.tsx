@@ -1,0 +1,105 @@
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Plus } from 'lucide-react';
+import { Currency } from '@/types/job';
+
+interface AddJobFormProps {
+  onAddJob: (name: string, month: string, amount: number, currency: Currency) => void;
+}
+
+const currencies: { value: Currency; label: string; symbol: string }[] = [
+  { value: 'EUR', label: 'EUR', symbol: '€' },
+  { value: 'USD', label: 'USD', symbol: '$' },
+  { value: 'GBP', label: 'GBP', symbol: '£' },
+  { value: 'SEK', label: 'SEK', symbol: 'kr' },
+];
+
+export function AddJobForm({ onAddJob }: AddJobFormProps) {
+  const [name, setName] = useState('');
+  const [month, setMonth] = useState('');
+  const [amount, setAmount] = useState('');
+  const [currency, setCurrency] = useState<Currency>('EUR');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim() || !month || !amount) return;
+
+    onAddJob(name.trim(), month, parseFloat(amount), currency);
+    setName('');
+    setMonth('');
+    setAmount('');
+  };
+
+  const selectedCurrency = currencies.find((c) => c.value === currency);
+
+  return (
+    <form onSubmit={handleSubmit} className="bg-card rounded-lg border p-6 shadow-sm">
+      <h2 className="text-lg font-semibold mb-4">Lägg till jobb</h2>
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="name">Jobbnamn</Label>
+          <Input
+            id="name"
+            placeholder="t.ex. Fotoshoot"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="month">Månad</Label>
+          <Input
+            id="month"
+            type="month"
+            value={month}
+            onChange={(e) => setMonth(e.target.value)}
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="amount">Belopp ({selectedCurrency?.symbol})</Label>
+          <Input
+            id="amount"
+            type="number"
+            step="0.01"
+            min="0"
+            placeholder="0.00"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>Valuta</Label>
+          <Select value={currency} onValueChange={(value) => setCurrency(value as Currency)}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-popover">
+              {currencies.map((c) => (
+                <SelectItem key={c.value} value={c.value}>
+                  {c.symbol} {c.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex items-end">
+          <Button type="submit" className="w-full">
+            <Plus className="w-4 h-4 mr-2" />
+            Lägg till
+          </Button>
+        </div>
+      </div>
+    </form>
+  );
+}

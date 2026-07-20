@@ -1,0 +1,199 @@
+import { useState } from 'react';
+import { Job, PaymentStatus } from '@/types/job';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Check, Clock, FileText, Trash2, CalendarDays } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { formatCurrency, formatMonth } from '@/lib/format';
+
+interface JobsTableProps {
+  jobs: Job[];
+  onCycleStatus: (id: string) => void;
+  onSetStatus: (id: string, status: PaymentStatus) => void;
+  onDelete: (id: string) => void;
+  onUpdateJob: (id: string, updates: Partial<Pick<Job, 'poNumber' | 'invoiceNumber' | 'invoiceMonth'>>) => void;
+  recentlyChangedIds?: Set<string>;
+  statusFilter?: PaymentStatus | null;
+}
+
+const statusConfig: Record<PaymentStatus, { label: string; icon: React.ElementType; className: string }> = {
+  unpaid: {
+    label: 'Unpaid',
+    icon: Clock,
+    className: 'bg-muted text-muted-foreground hover:bg-muted/80',
+  },
+  invoiced: {
+    label: 'Invoiced',
+    icon: FileText,
+    className: 'bg-primary text-primary-foreground hover:bg-primary/90',
+  },
+  paid: {
+    label: 'Paid',
+    icon: Check,
+    className: 'bg-success text-success-foreground hover:bg-success/90',
+  },
+};
+
+export function JobsTable({ jobs, onCycleStatus, onSetStatus, onDelete, onUpdateJob, recentlyChangedIds, statusFilter }: JobsTableProps) {
+  const [editingPo, setEditingPo] = useState<string | null>(null);
+  const [editingInvoice, setEditingInvoice] = useState<string | null>(null);
+  const [editingInvoiceMonth, setEditingInvoiceMonth] = useState<string | null>(null);
+
+  if (jobs.length === 0) {
+    return (
+      <div className="bg-card rounded-lg border p-12 text-center">
+        <p className="text-muted-foreground">No jobs for this year yet. Add your first job above!</p>
+      </div>
+    );
+  }
+
+  const handlePoBlur = (jobId: string, value: string) => {
+    onUpdateJob(jobId, { poNumber: value });
+    setEditingPo(null);
+  };
+
+  const handleInvoiceBlur = (jobId: string, value: string) => {
+    onUpdateJob(jobId, { invoiceNumber: value });
+    setEditingInvoice(null);
+  };
+
+  const handleInvoiceMonthBlur = (jobId: string, value: string) => {
+    onUpdateJob(jobId, { invoiceMonth: value });
+    setEditingInvoiceMonth(null);
+  };
+
+  return (
+    <div className="bg-card rounded-lg border shadow-sm overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead>
+            <tr className="border-b bg-muted/50">
+              <th className="text-left p-4 font-medium text-muted-foreground">Job</th>
+              <th className="text-left p-4 font-medium text-muted-foreground">Month</th>
+              <th className="text-right p-4 font-medium text-muted-foreground">Amount</th>
+              <th className="text-left p-4 font-medium text-muted-foreground">PO #</th>
+              <th className="text-left p-4 font-medium text-muted-foreground">Invoice #</th>
+              <th className="text-left p-4 font-medium text-muted-foreground">Fakturamånad</th>
+              <th className="text-center p-4 font-medium text-muted-foreground">Status</th>
+              <th className="text-center p-4 font-medium text-muted-foreground">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {jobs.map((job, index) => {
+              const config = statusConfig[job.status];
+              const Icon = config.icon;
+              const isMovedOut = statusFilter && recentlyChangedIds?.has(job.id) && job.status !== statusFilter;
+              return (
+                <tr
+                  key={job.id}
+                  className={cn(
+                    "border-b last:border-b-0 animate-fade-in transition-all hover:bg-muted/30",
+                    job.status === 'paid' && !isMovedOut && "bg-success/5",
+                    isMovedOut && "opacity-40"
+                  )}
+                  style={{ animationDelay: `${index * 50}ms` }}
+                >
+                  <td className="p-4 font-medium">{job.name}</td>
+                  <td className="p-4 text-muted-foreground">{formatMonth(job.month)}</td>
+                  <td className="p-4 text-right font-mono">{formatCurrency(job.amount, job.currency)}</td>
+                  <td className="p-4">
+                    {editingPo === job.id ? (
+                      <Input
+                        autoFocus
+                        className="h-8 w-24 text-xs"
+                        defaultValue={job.poNumber || ''}
+                        onBlur={(e) => handlePoBlur(job.id, e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            handlePoBlur(job.id, e.currentTarget.value);
+                          }
+                        }}
+                        placeholder="PO #"
+                      />
+                    ) : (
+                      <button
+                        onClick={() => setEditingPo(job.id)}
+                        className="text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded hover:bg-muted min-w-[60px] text-left"
+                      >
+                        {job.poNumber || '—'}
+                      </button>
+                    )}
+                  </td>
+                  <td className="p-4">
+                    {editingInvoice === job.id ? (
+                      <Input
+                        autoFocus
+                        className="h-8 w-24 text-xs"
+                        defaultValue={job.invoiceNumber || ''}
+                        onBlur={(e) => handleInvoiceBlur(job.id, e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            handleInvoiceBlur(job.id, e.currentTarget.value);
+                          }
+                        }}
+                        placeholder="INV #"
+                      />
+                    ) : (
+                      <button
+                        onClick={() => setEditingInvoice(job.id)}
+                        className="text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded hover:bg-muted min-w-[60px] text-left"
+                      >
+                        {job.invoiceNumber || '—'}
+                      </button>
+                    )}
+                  </td>
+                  <td className="p-4">
+                    {editingInvoiceMonth === job.id ? (
+                      <Input
+                        autoFocus
+                        type="month"
+                        className="h-8 w-32 text-xs"
+                        defaultValue={job.invoiceMonth || ''}
+                        onBlur={(e) => handleInvoiceMonthBlur(job.id, e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            handleInvoiceMonthBlur(job.id, e.currentTarget.value);
+                          }
+                        }}
+                      />
+                    ) : (
+                      <button
+                        onClick={() => setEditingInvoiceMonth(job.id)}
+                        className="text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded hover:bg-muted min-w-[60px] text-left flex items-center gap-1"
+                      >
+                        <CalendarDays className="w-3 h-3" />
+                        {job.invoiceMonth ? formatMonth(job.invoiceMonth) : '—'}
+                      </button>
+                    )}
+                  </td>
+                  <td className="p-4 text-center">
+                    <button
+                      onClick={() => onCycleStatus(job.id)}
+                      className={cn(
+                        "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all cursor-pointer",
+                        config.className
+                      )}
+                    >
+                      <Icon className="w-3.5 h-3.5" />
+                      {config.label}
+                    </button>
+                  </td>
+                  <td className="p-4 text-center">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onDelete(job.id)}
+                      className="text-muted-foreground hover:text-destructive"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}

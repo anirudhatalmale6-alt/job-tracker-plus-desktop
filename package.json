@@ -1,0 +1,49 @@
+{
+  "name": "job-tracker-plus",
+  "productName": "Job Tracker Plus",
+  "version": "1.0.0",
+  "description": "Job Tracker Plus - offline macOS desktop app for tracking jobs, payments and invoices",
+  "author": "Job Tracker",
+  "license": "UNLICENSED",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist:mac": "electron-builder --mac --arm64 --x64 --publish never",
+    "dist:mac-arm": "electron-builder --mac --arm64 --publish never",
+    "dist:mac-intel": "electron-builder --mac --x64 --publish never"
+  },
+  "build": {
+    "appId": "com.jobtrackerplus.desktop",
+    "productName": "Job Tracker Plus",
+    "files": [
+      "main.js",
+      "web/**/*",
+      "build/**/*"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.png",
+      "category": "public.app-category.business"
+    },
+    "dmg": {
+      "title": "Job Tracker Plus"
+    }
+  },
+  "devDependencies": {
+    "@electron/packager": "^20.0.3",
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  }
+}

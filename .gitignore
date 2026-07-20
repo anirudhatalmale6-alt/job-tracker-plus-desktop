@@ -1,0 +1,7 @@
+node_modules/
+dist/
+dist-mac/
+src-app/node_modules/
+src-app/dist/
+*.zip
+*.log
