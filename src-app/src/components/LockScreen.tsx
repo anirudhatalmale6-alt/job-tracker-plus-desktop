@@ -4,9 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Lock, Fingerprint } from 'lucide-react';
 import { touchIDAvailable, touchIDAuthenticate, touchIDEnabled } from '@/lib/touchid';
+import { useLang } from '@/lib/i18n';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 export function LockScreen() {
   const { unlock, unlockBiometric } = useAuth();
+  const { t } = useLang();
   const [pw, setPw] = useState('');
   const [error, setError] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -60,7 +63,7 @@ export function LockScreen() {
         </div>
         <div className="text-center">
           <h1 className="text-xl font-bold">Job Tracker</h1>
-          <p className="text-sm text-muted-foreground mt-1">Enter your password to unlock</p>
+          <p className="text-sm text-muted-foreground mt-1">{t('lock.subtitle')}</p>
         </div>
         <div className="w-full">
           <Input
@@ -71,13 +74,13 @@ export function LockScreen() {
               setPw(e.target.value);
               setError(false);
             }}
-            placeholder="Password"
+            placeholder={t('lock.password')}
             className={error ? 'border-destructive' : ''}
           />
-          {error && <p className="text-sm text-destructive mt-2">Incorrect password. Please try again.</p>}
+          {error && <p className="text-sm text-destructive mt-2">{t('lock.wrong')}</p>}
         </div>
         <Button type="submit" className="w-full" disabled={busy || !pw}>
-          {busy ? 'Unlocking…' : 'Unlock'}
+          {busy ? t('lock.unlocking') : t('lock.unlock')}
         </Button>
         {showTouchID && (
           <Button
@@ -88,9 +91,10 @@ export function LockScreen() {
             disabled={touchBusy}
           >
             <Fingerprint className="w-4 h-4 mr-2" />
-            {touchBusy ? 'Waiting for Touch ID…' : 'Unlock with Touch ID'}
+            {touchBusy ? t('lock.touchidWaiting') : t('lock.touchid')}
           </Button>
         )}
+        <LanguageSwitcher />
       </form>
     </div>
   );

@@ -1,6 +1,7 @@
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { JobCategory } from '@/types/job';
 import { Camera, Users } from 'lucide-react';
+import { useLang } from '@/lib/i18n';
 
 interface CategoryTabsProps {
   selectedCategory: JobCategory;
@@ -8,16 +9,17 @@ interface CategoryTabsProps {
 }
 
 export function CategoryTabs({ selectedCategory, onCategoryChange }: CategoryTabsProps) {
+  const { t } = useLang();
   return (
     <Tabs value={selectedCategory} onValueChange={(value) => onCategoryChange(value as JobCategory)}>
       <TabsList className="grid w-full grid-cols-2 max-w-[300px]">
         <TabsTrigger value="modellande" className="flex items-center gap-2">
           <Camera className="w-4 h-4" />
-          Modellande
+          {t('cat.modellande')}
         </TabsTrigger>
         <TabsTrigger value="socials" className="flex items-center gap-2">
           <Users className="w-4 h-4" />
-          Socials
+          {t('cat.socials')}
         </TabsTrigger>
       </TabsList>
     </Tabs>

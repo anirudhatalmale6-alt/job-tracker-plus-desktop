@@ -4,6 +4,7 @@ import { formatCurrency, formatShortMonth } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Calendar, CalendarDays } from 'lucide-react';
+import { useLang } from '@/lib/i18n';
 
 interface MonthlySummaryProps {
   jobs: Job[];
@@ -17,6 +18,7 @@ const months = [
 
 export function MonthlySummary({ jobs, selectedYear }: MonthlySummaryProps) {
   const [viewMode, setViewMode] = useState<'year' | 'month'>('year');
+  const { t, lang } = useLang();
 
   // Group by currency, then calculate totals
   type CurrencyTotals = Record<Currency, { unpaid: number; invoiced: number; paid: number }>;
@@ -61,9 +63,9 @@ export function MonthlySummary({ jobs, selectedYear }: MonthlySummaryProps) {
     <div className="bg-card rounded-lg border shadow-sm overflow-hidden">
       <div className="p-4 border-b bg-muted/50 flex items-center justify-between">
         <div>
-          <h3 className="font-semibold">Översikt - {selectedYear}</h3>
+          <h3 className="font-semibold">{t('summary.overview')} - {selectedYear}</h3>
           <p className="text-sm text-muted-foreground">
-            {viewMode === 'year' ? 'Årlig summering' : 'Månadsvis översikt'}
+            {viewMode === 'year' ? t('summary.yearly') : t('summary.monthly')}
           </p>
         </div>
         <div className="flex gap-1 bg-muted rounded-lg p-1">
@@ -74,7 +76,7 @@ export function MonthlySummary({ jobs, selectedYear }: MonthlySummaryProps) {
             onClick={() => setViewMode('year')}
           >
             <Calendar className="w-3.5 h-3.5 mr-1" />
-            År
+            {t('summary.year')}
           </Button>
           <Button
             variant={viewMode === 'month' ? 'default' : 'ghost'}
@@ -83,7 +85,7 @@ export function MonthlySummary({ jobs, selectedYear }: MonthlySummaryProps) {
             onClick={() => setViewMode('month')}
           >
             <CalendarDays className="w-3.5 h-3.5 mr-1" />
-            Månad
+            {t('summary.month')}
           </Button>
         </div>
       </div>
@@ -91,20 +93,20 @@ export function MonthlySummary({ jobs, selectedYear }: MonthlySummaryProps) {
         {viewMode === 'year' ? (
           <div className="flex flex-wrap gap-4 justify-center">
             <div className="text-center p-4 rounded-lg bg-muted/30 min-w-[140px]">
-              <p className="text-xs text-muted-foreground uppercase mb-1">Totalt</p>
-              <p className="text-lg font-bold">{currencies.length > 0 ? formatMultiCurrency((t) => t.unpaid + t.invoiced + t.paid) : '—'}</p>
+              <p className="text-xs text-muted-foreground uppercase mb-1">{t('summary.total')}</p>
+              <p className="text-lg font-bold">{currencies.length > 0 ? formatMultiCurrency((c) => c.unpaid + c.invoiced + c.paid) : '—'}</p>
             </div>
             <div className="text-center p-4 rounded-lg bg-muted/30 min-w-[140px]">
-              <p className="text-xs text-muted-foreground uppercase mb-1">Obetalt</p>
-              <p className="text-lg font-bold text-muted-foreground">{formatMultiCurrency((t) => t.unpaid)}</p>
+              <p className="text-xs text-muted-foreground uppercase mb-1">{t('stats.unpaid')}</p>
+              <p className="text-lg font-bold text-muted-foreground">{formatMultiCurrency((c) => c.unpaid)}</p>
             </div>
             <div className="text-center p-4 rounded-lg bg-muted/30 min-w-[140px]">
-              <p className="text-xs text-muted-foreground uppercase mb-1">Fakturerat</p>
-              <p className="text-lg font-bold text-primary">{formatMultiCurrency((t) => t.invoiced)}</p>
+              <p className="text-xs text-muted-foreground uppercase mb-1">{t('stats.invoiced')}</p>
+              <p className="text-lg font-bold text-primary">{formatMultiCurrency((c) => c.invoiced)}</p>
             </div>
             <div className="text-center p-4 rounded-lg bg-muted/30 min-w-[140px]">
-              <p className="text-xs text-muted-foreground uppercase mb-1">Betalt</p>
-              <p className="text-lg font-bold text-success">{formatMultiCurrency((t) => t.paid)}</p>
+              <p className="text-xs text-muted-foreground uppercase mb-1">{t('summary.paid')}</p>
+              <p className="text-lg font-bold text-success">{formatMultiCurrency((c) => c.paid)}</p>
             </div>
           </div>
         ) : (
@@ -124,7 +126,7 @@ export function MonthlySummary({ jobs, selectedYear }: MonthlySummaryProps) {
                     )}
                   >
                     <p className="text-xs font-medium text-muted-foreground uppercase">
-                      {formatShortMonth(`${selectedYear}-${month}`)}
+                      {formatShortMonth(`${selectedYear}-${month}`, lang)}
                     </p>
                     {hasData ? (
                       <div className="mt-1 space-y-0.5">
@@ -154,13 +156,13 @@ export function MonthlySummary({ jobs, selectedYear }: MonthlySummaryProps) {
             </div>
             <div className="flex gap-4 mt-4 text-xs text-muted-foreground justify-center">
               <span className="flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-muted-foreground"></span> Obetalt
+                <span className="w-2 h-2 rounded-full bg-muted-foreground"></span> {t('stats.unpaid')}
               </span>
               <span className="flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-primary"></span> Fakturerat
+                <span className="w-2 h-2 rounded-full bg-primary"></span> {t('stats.invoiced')}
               </span>
               <span className="flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-success"></span> Betalt
+                <span className="w-2 h-2 rounded-full bg-success"></span> {t('summary.paid')}
               </span>
             </div>
           </>

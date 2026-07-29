@@ -21,9 +21,11 @@ import {
   touchIDEnabled,
   setTouchIDEnabled,
 } from '@/lib/touchid';
+import { useLang } from '@/lib/i18n';
 
 export function PasswordSettings() {
   const { hasPassword, setPassword, changePassword, removePassword, lock } = useAuth();
+  const { t } = useLang();
   const [open, setOpen] = useState(false);
   const [current, setCurrent] = useState('');
   const [next, setNext] = useState('');
@@ -55,16 +57,16 @@ export function PasswordSettings() {
       // surprised at the next launch.
       const ok = await touchIDAuthenticate();
       if (!ok) {
-        toast.error('Touch ID was not confirmed');
+        toast.error(t('toast.touchidNotConfirmed'));
         return;
       }
       setTouchIDEnabled(true);
       setTouchIDOn(true);
-      toast.success('Touch ID unlock enabled');
+      toast.success(t('toast.touchidOn'));
     } else {
       setTouchIDEnabled(false);
       setTouchIDOn(false);
-      toast.success('Touch ID unlock disabled');
+      toast.success(t('toast.touchidOff'));
     }
   };
 
@@ -85,11 +87,11 @@ export function PasswordSettings() {
     e.preventDefault();
     setError('');
     if (next.length < 4) {
-      setError('Password must be at least 4 characters.');
+      setError(t('sec.errMinLen'));
       return;
     }
     if (next !== confirm) {
-      setError('Passwords do not match.');
+      setError(t('sec.errMatch'));
       return;
     }
     setBusy(true);
@@ -97,14 +99,14 @@ export function PasswordSettings() {
       const ok = await changePassword(current, next);
       setBusy(false);
       if (!ok) {
-        setError('Current password is incorrect.');
+        setError(t('sec.errCurrent'));
         return;
       }
-      toast.success('Password updated');
+      toast.success(t('toast.pwUpdated'));
     } else {
       await setPassword(next);
       setBusy(false);
-      toast.success('Password protection enabled');
+      toast.success(t('toast.pwEnabled'));
     }
     handleOpenChange(false);
   };
@@ -112,20 +114,20 @@ export function PasswordSettings() {
   const handleRemove = async () => {
     setError('');
     if (!current) {
-      setError('Enter your current password to remove protection.');
+      setError(t('sec.errRemoveCurrent'));
       return;
     }
     setBusy(true);
     const ok = await removePassword(current);
     setBusy(false);
     if (!ok) {
-      setError('Current password is incorrect.');
+      setError(t('sec.errCurrent'));
       return;
     }
     // No password means nothing to unlock, so Touch ID no longer applies.
     setTouchIDEnabled(false);
     setTouchIDOn(false);
-    toast.success('Password protection removed');
+    toast.success(t('toast.pwRemoved'));
     handleOpenChange(false);
   };
 
@@ -133,30 +135,28 @@ export function PasswordSettings() {
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <div className="flex items-center gap-2">
         {hasPassword && (
-          <Button variant="outline" size="sm" onClick={lock} title="Lock now">
+          <Button variant="outline" size="sm" onClick={lock} title={t('sec.lockNow')}>
             <Lock className="w-4 h-4" />
           </Button>
         )}
         <DialogTrigger asChild>
           <Button variant="outline" size="sm">
             <ShieldCheck className="w-4 h-4 mr-1" />
-            {hasPassword ? 'Security' : 'Set password'}
+            {hasPassword ? t('sec.security') : t('sec.setPassword')}
           </Button>
         </DialogTrigger>
       </div>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{hasPassword ? 'Change password' : 'Set a password'}</DialogTitle>
+          <DialogTitle>{hasPassword ? t('sec.changeTitle') : t('sec.setTitle')}</DialogTitle>
           <DialogDescription>
-            {hasPassword
-              ? 'Update or remove the password used to unlock the app.'
-              : "Protect the app with a password. You'll be asked for it each time you open the app."}
+            {hasPassword ? t('sec.changeDesc') : t('sec.setDesc')}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={submit} className="space-y-4">
           {hasPassword && (
             <div className="space-y-1.5">
-              <Label htmlFor="jt-current-pw">Current password</Label>
+              <Label htmlFor="jt-current-pw">{t('sec.current')}</Label>
               <Input
                 id="jt-current-pw"
                 type="password"
@@ -167,7 +167,7 @@ export function PasswordSettings() {
             </div>
           )}
           <div className="space-y-1.5">
-            <Label htmlFor="jt-new-pw">{hasPassword ? 'New password' : 'Password'}</Label>
+            <Label htmlFor="jt-new-pw">{hasPassword ? t('sec.new') : t('sec.password')}</Label>
             <Input
               id="jt-new-pw"
               type="password"
@@ -177,7 +177,7 @@ export function PasswordSettings() {
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="jt-confirm-pw">Confirm password</Label>
+            <Label htmlFor="jt-confirm-pw">{t('sec.confirm')}</Label>
             <Input
               id="jt-confirm-pw"
               type="password"
@@ -190,8 +190,8 @@ export function PasswordSettings() {
               <div className="flex items-center gap-2">
                 <Fingerprint className="w-4 h-4 text-muted-foreground" />
                 <div>
-                  <p className="text-sm font-medium">Unlock with Touch ID</p>
-                  <p className="text-xs text-muted-foreground">Use your fingerprint instead of typing the password</p>
+                  <p className="text-sm font-medium">{t('sec.touchidLabel')}</p>
+                  <p className="text-xs text-muted-foreground">{t('sec.touchidHint')}</p>
                 </div>
               </div>
               <Switch checked={touchIDOn} onCheckedChange={handleTouchIDToggle} />
@@ -207,11 +207,11 @@ export function PasswordSettings() {
                 onClick={handleRemove}
                 disabled={busy}
               >
-                Remove password
+                {t('sec.remove')}
               </Button>
             )}
             <Button type="submit" disabled={busy}>
-              {hasPassword ? 'Save changes' : 'Enable protection'}
+              {hasPassword ? t('sec.save') : t('sec.enable')}
             </Button>
           </DialogFooter>
         </form>

@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/select';
 import { Plus } from 'lucide-react';
 import { Currency } from '@/types/job';
+import { useLang } from '@/lib/i18n';
 
 interface AddJobFormProps {
   onAddJob: (name: string, month: string, amount: number, currency: Currency) => void;
@@ -24,6 +25,7 @@ const currencies: { value: Currency; label: string; symbol: string }[] = [
 ];
 
 export function AddJobForm({ onAddJob }: AddJobFormProps) {
+  const { t } = useLang();
   const [name, setName] = useState('');
   const [month, setMonth] = useState('');
   const [amount, setAmount] = useState('');
@@ -43,20 +45,20 @@ export function AddJobForm({ onAddJob }: AddJobFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="bg-card rounded-lg border p-6 shadow-sm">
-      <h2 className="text-lg font-semibold mb-4">Lägg till jobb</h2>
+      <h2 className="text-lg font-semibold mb-4">{t('form.addJob')}</h2>
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="name">Jobbnamn</Label>
+          <Label htmlFor="name">{t('form.jobName')}</Label>
           <Input
             id="name"
-            placeholder="t.ex. Fotoshoot"
+            placeholder={t('form.jobNamePlaceholder')}
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="month">Månad</Label>
+          <Label htmlFor="month">{t('form.month')}</Label>
           <Input
             id="month"
             type="month"
@@ -66,7 +68,7 @@ export function AddJobForm({ onAddJob }: AddJobFormProps) {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="amount">Belopp ({selectedCurrency?.symbol})</Label>
+          <Label htmlFor="amount">{t('form.amount')} ({selectedCurrency?.symbol})</Label>
           <Input
             id="amount"
             type="number"
@@ -79,7 +81,7 @@ export function AddJobForm({ onAddJob }: AddJobFormProps) {
           />
         </div>
         <div className="space-y-2">
-          <Label>Valuta</Label>
+          <Label>{t('form.currency')}</Label>
           <Select value={currency} onValueChange={(value) => setCurrency(value as Currency)}>
             <SelectTrigger>
               <SelectValue />
@@ -96,7 +98,7 @@ export function AddJobForm({ onAddJob }: AddJobFormProps) {
         <div className="flex items-end">
           <Button type="submit" className="w-full">
             <Plus className="w-4 h-4 mr-2" />
-            Lägg till
+            {t('form.add')}
           </Button>
         </div>
       </div>

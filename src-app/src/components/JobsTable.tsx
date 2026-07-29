@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Check, Clock, FileText, Trash2, CalendarDays } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatCurrency, formatMonth } from '@/lib/format';
+import { useLang } from '@/lib/i18n';
 
 interface JobsTableProps {
   jobs: Job[];
@@ -16,25 +17,26 @@ interface JobsTableProps {
   statusFilter?: PaymentStatus | null;
 }
 
-const statusConfig: Record<PaymentStatus, { label: string; icon: React.ElementType; className: string }> = {
+const statusConfig: Record<PaymentStatus, { labelKey: string; icon: React.ElementType; className: string }> = {
   unpaid: {
-    label: 'Unpaid',
+    labelKey: 'status.unpaid',
     icon: Clock,
     className: 'bg-muted text-muted-foreground hover:bg-muted/80',
   },
   invoiced: {
-    label: 'Invoiced',
+    labelKey: 'status.invoiced',
     icon: FileText,
     className: 'bg-primary text-primary-foreground hover:bg-primary/90',
   },
   paid: {
-    label: 'Paid',
+    labelKey: 'status.paid',
     icon: Check,
     className: 'bg-success text-success-foreground hover:bg-success/90',
   },
 };
 
 export function JobsTable({ jobs, onCycleStatus, onSetStatus, onDelete, onUpdateJob, recentlyChangedIds, statusFilter }: JobsTableProps) {
+  const { t, lang } = useLang();
   const [editingPo, setEditingPo] = useState<string | null>(null);
   const [editingInvoice, setEditingInvoice] = useState<string | null>(null);
   const [editingInvoiceMonth, setEditingInvoiceMonth] = useState<string | null>(null);
@@ -42,7 +44,7 @@ export function JobsTable({ jobs, onCycleStatus, onSetStatus, onDelete, onUpdate
   if (jobs.length === 0) {
     return (
       <div className="bg-card rounded-lg border p-12 text-center">
-        <p className="text-muted-foreground">No jobs for this year yet. Add your first job above!</p>
+        <p className="text-muted-foreground">{t('table.empty')}</p>
       </div>
     );
   }
@@ -68,14 +70,14 @@ export function JobsTable({ jobs, onCycleStatus, onSetStatus, onDelete, onUpdate
         <table className="w-full">
           <thead>
             <tr className="border-b bg-muted/50">
-              <th className="text-left p-4 font-medium text-muted-foreground">Job</th>
-              <th className="text-left p-4 font-medium text-muted-foreground">Month</th>
-              <th className="text-right p-4 font-medium text-muted-foreground">Amount</th>
-              <th className="text-left p-4 font-medium text-muted-foreground">PO #</th>
-              <th className="text-left p-4 font-medium text-muted-foreground">Invoice #</th>
-              <th className="text-left p-4 font-medium text-muted-foreground">Fakturamånad</th>
-              <th className="text-center p-4 font-medium text-muted-foreground">Status</th>
-              <th className="text-center p-4 font-medium text-muted-foreground">Actions</th>
+              <th className="text-left p-4 font-medium text-muted-foreground">{t('table.job')}</th>
+              <th className="text-left p-4 font-medium text-muted-foreground">{t('table.month')}</th>
+              <th className="text-right p-4 font-medium text-muted-foreground">{t('table.amount')}</th>
+              <th className="text-left p-4 font-medium text-muted-foreground">{t('table.po')}</th>
+              <th className="text-left p-4 font-medium text-muted-foreground">{t('table.invoice')}</th>
+              <th className="text-left p-4 font-medium text-muted-foreground">{t('table.invoiceMonth')}</th>
+              <th className="text-center p-4 font-medium text-muted-foreground">{t('table.status')}</th>
+              <th className="text-center p-4 font-medium text-muted-foreground">{t('table.actions')}</th>
             </tr>
           </thead>
           <tbody>
@@ -94,7 +96,7 @@ export function JobsTable({ jobs, onCycleStatus, onSetStatus, onDelete, onUpdate
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
                   <td className="p-4 font-medium">{job.name}</td>
-                  <td className="p-4 text-muted-foreground">{formatMonth(job.month)}</td>
+                  <td className="p-4 text-muted-foreground">{formatMonth(job.month, lang)}</td>
                   <td className="p-4 text-right font-mono">{formatCurrency(job.amount, job.currency)}</td>
                   <td className="p-4">
                     {editingPo === job.id ? (
@@ -162,7 +164,7 @@ export function JobsTable({ jobs, onCycleStatus, onSetStatus, onDelete, onUpdate
                         className="text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded hover:bg-muted min-w-[60px] text-left flex items-center gap-1"
                       >
                         <CalendarDays className="w-3 h-3" />
-                        {job.invoiceMonth ? formatMonth(job.invoiceMonth) : '—'}
+                        {job.invoiceMonth ? formatMonth(job.invoiceMonth, lang) : '—'}
                       </button>
                     )}
                   </td>
@@ -175,7 +177,7 @@ export function JobsTable({ jobs, onCycleStatus, onSetStatus, onDelete, onUpdate
                       )}
                     >
                       <Icon className="w-3.5 h-3.5" />
-                      {config.label}
+                      {t(config.labelKey)}
                     </button>
                   </td>
                   <td className="p-4 text-center">

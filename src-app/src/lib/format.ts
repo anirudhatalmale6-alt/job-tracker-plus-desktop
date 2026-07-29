@@ -14,14 +14,20 @@ export function formatCurrency(amount: number, currency: Currency = 'GBP'): stri
   }).format(amount);
 }
 
-export function formatMonth(monthString: string): string {
-  const [year, month] = monthString.split('-');
-  const date = new Date(parseInt(year), parseInt(month) - 1);
-  return date.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+// Locale for month names; 'sv' shows Swedish month names, otherwise English.
+type MonthLang = 'sv' | 'en';
+function monthLocale(lang?: MonthLang): string {
+  return lang === 'sv' ? 'sv-SE' : 'en-GB';
 }
 
-export function formatShortMonth(monthString: string): string {
+export function formatMonth(monthString: string, lang?: MonthLang): string {
   const [year, month] = monthString.split('-');
   const date = new Date(parseInt(year), parseInt(month) - 1);
-  return date.toLocaleDateString('en-GB', { month: 'short' });
+  return date.toLocaleDateString(monthLocale(lang), { month: 'long', year: 'numeric' });
+}
+
+export function formatShortMonth(monthString: string, lang?: MonthLang): string {
+  const [year, month] = monthString.split('-');
+  const date = new Date(parseInt(year), parseInt(month) - 1);
+  return date.toLocaleDateString(monthLocale(lang), { month: 'short' });
 }

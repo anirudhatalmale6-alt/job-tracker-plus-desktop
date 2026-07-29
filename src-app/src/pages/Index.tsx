@@ -8,8 +8,10 @@ import { DataActions } from '@/components/DataActions';
 import { CategoryTabs } from '@/components/CategoryTabs';
 import { InvoiceMonthFilter } from '@/components/InvoiceMonthFilter';
 import { PasswordSettings } from '@/components/PasswordSettings';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { FileText, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useLang } from '@/lib/i18n';
 
 const Index = () => {
   const {
@@ -42,6 +44,8 @@ const Index = () => {
     clearRecentlyChanged,
   } = useJobs();
 
+  const { t } = useLang();
+
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-6xl mx-auto px-4 py-8">
@@ -54,7 +58,7 @@ const Index = () => {
               </div>
               <div>
                 <h1 className="text-2xl font-bold">Job Tracker</h1>
-                <p className="text-muted-foreground">Track your jobs and payments</p>
+                <p className="text-muted-foreground">{t('app.subtitle')}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -63,6 +67,7 @@ const Index = () => {
                 onCategoryChange={setSelectedCategory}
               />
               <PasswordSettings />
+              <LanguageSwitcher />
             </div>
           </div>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -118,10 +123,10 @@ const Index = () => {
         <div className="space-y-2">
           {statusFilter && recentlyChangedIds.size > 0 && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span>{recentlyChangedIds.size} jobb har ändrad status</span>
+              <span>{t('list.statusChanged', { n: recentlyChangedIds.size })}</span>
               <Button variant="outline" size="sm" onClick={clearRecentlyChanged}>
                 <RefreshCw className="w-3 h-3 mr-1" />
-                Uppdatera lista
+                {t('list.refresh')}
               </Button>
             </div>
           )}

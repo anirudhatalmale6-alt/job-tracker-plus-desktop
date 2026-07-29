@@ -2,6 +2,7 @@ import { Briefcase, CheckCircle2, Clock, FileText } from 'lucide-react';
 import { formatCurrency } from '@/lib/format';
 import { Job, Currency, PaymentStatus } from '@/types/job';
 import { cn } from '@/lib/utils';
+import { useLang } from '@/lib/i18n';
 
 interface StatsCardsProps {
   jobs: Job[];
@@ -14,6 +15,7 @@ interface StatsCardsProps {
 type CurrencyTotals = Record<Currency, { total: number; paid: number; invoiced: number; unpaid: number }>;
 
 export function StatsCards({ jobs, jobCount, paidJobCount, statusFilter, onStatusFilterChange }: StatsCardsProps) {
+  const { t } = useLang();
   const currencyTotals = jobs.reduce<CurrencyTotals>((acc, job) => {
     if (!acc[job.currency]) {
       acc[job.currency] = { total: 0, paid: 0, invoiced: 0, unpaid: 0 };
@@ -50,7 +52,7 @@ export function StatsCards({ jobs, jobCount, paidJobCount, statusFilter, onStatu
             <Briefcase className="w-5 h-5 text-primary" />
           </div>
           <div className="min-w-0">
-            <p className="text-sm text-muted-foreground">Totalt jobb</p>
+            <p className="text-sm text-muted-foreground">{t('stats.totalJobs')}</p>
             <p className="text-xl font-bold">{jobCount}</p>
           </div>
         </div>
@@ -62,7 +64,7 @@ export function StatsCards({ jobs, jobCount, paidJobCount, statusFilter, onStatu
             <CheckCircle2 className="w-5 h-5 text-success" />
           </div>
           <div className="min-w-0">
-            <p className="text-sm text-muted-foreground">Betalda jobb</p>
+            <p className="text-sm text-muted-foreground">{t('stats.paidJobs')}</p>
             <p className="text-xl font-bold text-success">{paidJobCount}</p>
           </div>
         </div>
@@ -74,7 +76,7 @@ export function StatsCards({ jobs, jobCount, paidJobCount, statusFilter, onStatu
             <Briefcase className="w-5 h-5 text-primary" />
           </div>
           <div className="min-w-0">
-            <p className="text-sm text-muted-foreground">Totalt värde</p>
+            <p className="text-sm text-muted-foreground">{t('stats.totalValue')}</p>
             <p className="text-base font-bold truncate" title={formatMultiCurrency((t) => t.total)}>
               {formatMultiCurrency((t) => t.total)}
             </p>
@@ -88,7 +90,7 @@ export function StatsCards({ jobs, jobCount, paidJobCount, statusFilter, onStatu
             <Clock className="w-5 h-5 text-muted-foreground" />
           </div>
           <div className="min-w-0">
-            <p className="text-sm text-muted-foreground">Obetalt</p>
+            <p className="text-sm text-muted-foreground">{t('stats.unpaid')}</p>
             <p className="text-base font-bold truncate" title={formatMultiCurrency((t) => t.unpaid)}>
               {formatMultiCurrency((t) => t.unpaid)}
             </p>
@@ -102,7 +104,7 @@ export function StatsCards({ jobs, jobCount, paidJobCount, statusFilter, onStatu
             <FileText className="w-5 h-5 text-primary" />
           </div>
           <div className="min-w-0">
-            <p className="text-sm text-muted-foreground">Fakturerat</p>
+            <p className="text-sm text-muted-foreground">{t('stats.invoiced')}</p>
             <p className="text-base font-bold text-primary truncate" title={formatMultiCurrency((t) => t.invoiced)}>
               {formatMultiCurrency((t) => t.invoiced)}
             </p>
@@ -116,7 +118,7 @@ export function StatsCards({ jobs, jobCount, paidJobCount, statusFilter, onStatu
             <CheckCircle2 className="w-5 h-5 text-success" />
           </div>
           <div className="min-w-0">
-            <p className="text-sm text-muted-foreground">Betalt värde</p>
+            <p className="text-sm text-muted-foreground">{t('stats.paidValue')}</p>
             <p className="text-base font-bold text-success truncate" title={formatMultiCurrency((t) => t.paid)}>
               {formatMultiCurrency((t) => t.paid)}
             </p>
