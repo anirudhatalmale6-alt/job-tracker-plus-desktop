@@ -7,6 +7,7 @@ import { YearSelector } from '@/components/YearSelector';
 import { DataActions } from '@/components/DataActions';
 import { CategoryTabs } from '@/components/CategoryTabs';
 import { InvoiceMonthFilter } from '@/components/InvoiceMonthFilter';
+import { PasswordSettings } from '@/components/PasswordSettings';
 import { FileText, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -56,10 +57,13 @@ const Index = () => {
                 <p className="text-muted-foreground">Track your jobs and payments</p>
               </div>
             </div>
-            <CategoryTabs
-              selectedCategory={selectedCategory}
-              onCategoryChange={setSelectedCategory}
-            />
+            <div className="flex items-center gap-2">
+              <CategoryTabs
+                selectedCategory={selectedCategory}
+                onCategoryChange={setSelectedCategory}
+              />
+              <PasswordSettings />
+            </div>
           </div>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <YearSelector
