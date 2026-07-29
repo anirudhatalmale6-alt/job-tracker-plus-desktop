@@ -1,9 +1,10 @@
-import { useState, FormEvent } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import {
   Dialog,
   DialogContent,
@@ -13,7 +14,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Lock, ShieldCheck } from 'lucide-react';
+import { Lock, ShieldCheck, Fingerprint } from 'lucide-react';
+import {
+  touchIDAvailable,
+  touchIDAuthenticate,
+  touchIDEnabled,
+  setTouchIDEnabled,
+} from '@/lib/touchid';
 
 export function PasswordSettings() {
   const { hasPassword, setPassword, changePassword, removePassword, lock } = useAuth();
@@ -23,6 +30,43 @@ export function PasswordSettings() {
   const [confirm, setConfirm] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [touchIDSupported, setTouchIDSupported] = useState(false);
+  const [touchIDOn, setTouchIDOn] = useState(false);
+
+  // Check for Touch ID hardware whenever the dialog opens (only relevant once a
+  // password exists, since Touch ID is an alternative way to unlock).
+  useEffect(() => {
+    if (!open || !hasPassword) return;
+    let cancelled = false;
+    (async () => {
+      const available = await touchIDAvailable();
+      if (cancelled) return;
+      setTouchIDSupported(available);
+      setTouchIDOn(touchIDEnabled());
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [open, hasPassword]);
+
+  const handleTouchIDToggle = async (checked: boolean) => {
+    if (checked) {
+      // Confirm the fingerprint works before enabling, so the user isn't
+      // surprised at the next launch.
+      const ok = await touchIDAuthenticate();
+      if (!ok) {
+        toast.error('Touch ID was not confirmed');
+        return;
+      }
+      setTouchIDEnabled(true);
+      setTouchIDOn(true);
+      toast.success('Touch ID unlock enabled');
+    } else {
+      setTouchIDEnabled(false);
+      setTouchIDOn(false);
+      toast.success('Touch ID unlock disabled');
+    }
+  };
 
   const reset = () => {
     setCurrent('');
@@ -78,6 +122,9 @@ export function PasswordSettings() {
       setError('Current password is incorrect.');
       return;
     }
+    // No password means nothing to unlock, so Touch ID no longer applies.
+    setTouchIDEnabled(false);
+    setTouchIDOn(false);
     toast.success('Password protection removed');
     handleOpenChange(false);
   };
@@ -138,6 +185,18 @@ export function PasswordSettings() {
               onChange={(e) => setConfirm(e.target.value)}
             />
           </div>
+          {hasPassword && touchIDSupported && (
+            <div className="flex items-center justify-between rounded-lg border p-3">
+              <div className="flex items-center gap-2">
+                <Fingerprint className="w-4 h-4 text-muted-foreground" />
+                <div>
+                  <p className="text-sm font-medium">Unlock with Touch ID</p>
+                  <p className="text-xs text-muted-foreground">Use your fingerprint instead of typing the password</p>
+                </div>
+              </div>
+              <Switch checked={touchIDOn} onCheckedChange={handleTouchIDToggle} />
+            </div>
+          )}
           {error && <p className="text-sm text-destructive">{error}</p>}
           <DialogFooter className="gap-2 sm:gap-0">
             {hasPassword && (

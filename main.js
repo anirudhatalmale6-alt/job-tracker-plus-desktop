@@ -7,7 +7,7 @@
 //   3. Absolute asset paths (/static/...) resolve correctly (they don't under file://).
 // The app is 100% self-contained and works fully offline - no server, no internet.
 
-const { app, BrowserWindow, protocol, net, shell, Menu } = require('electron');
+const { app, BrowserWindow, protocol, net, shell, Menu, ipcMain, systemPreferences } = require('electron');
 const path = require('path');
 const { pathToFileURL } = require('url');
 
@@ -71,7 +71,8 @@ function createWindow() {
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
-      spellcheck: false
+      spellcheck: false,
+      preload: path.join(__dirname, 'preload.js')
     }
   });
 
@@ -121,6 +122,31 @@ function buildMenu() {
   ];
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 }
+
+// --- Touch ID (macOS biometric unlock) -------------------------------------
+// The renderer asks whether Touch ID is available and, if the user enabled it,
+// triggers the native fingerprint prompt. This only works on Macs with Touch ID
+// hardware; on any other platform/hardware it reports unavailable and the app
+// falls back to the password unlock.
+ipcMain.handle('touchid:available', () => {
+  try {
+    return process.platform === 'darwin' && systemPreferences.canPromptTouchID();
+  } catch (e) {
+    return false;
+  }
+});
+
+ipcMain.handle('touchid:authenticate', async () => {
+  try {
+    if (process.platform !== 'darwin' || !systemPreferences.canPromptTouchID()) {
+      return { ok: false, error: 'unavailable' };
+    }
+    await systemPreferences.promptTouchID('unlock Job Tracker');
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: String((e && e.message) || e) };
+  }
+});
 
 app.whenReady().then(() => {
   // Serve the bundled web app over the custom scheme.

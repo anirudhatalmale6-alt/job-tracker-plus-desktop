@@ -10,6 +10,7 @@ interface AuthState {
   hasPassword: boolean;
   locked: boolean;
   unlock: (password: string) => Promise<boolean>;
+  unlockBiometric: () => void;
   lock: () => void;
   setPassword: (password: string) => Promise<void>;
   changePassword: (current: string, next: string) => Promise<boolean>;
@@ -28,6 +29,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const ok = await verifyPassword(password);
     if (ok) setLocked(false);
     return ok;
+  }, []);
+
+  // Only reachable from the lock screen, i.e. when a password is already set and
+  // the user has passed the native Touch ID prompt. Biometrics authenticate the
+  // Mac's owner, so on success we let them straight in.
+  const unlockBiometric = useCallback(() => {
+    if (storedHasPassword()) setLocked(false);
   }, []);
 
   const lock = useCallback(() => {
@@ -59,7 +67,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ hasPassword: hasPw, locked, unlock, lock, setPassword, changePassword, removePassword }}
+      value={{ hasPassword: hasPw, locked, unlock, unlockBiometric, lock, setPassword, changePassword, removePassword }}
     >
       {children}
     </AuthContext.Provider>
