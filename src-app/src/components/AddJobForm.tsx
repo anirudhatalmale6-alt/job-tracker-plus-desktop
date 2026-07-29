@@ -24,18 +24,28 @@ const currencies: { value: Currency; label: string; symbol: string }[] = [
   { value: 'SEK', label: 'SEK', symbol: 'kr' },
 ];
 
+const LAST_CURRENCY_KEY = 'jt-last-currency';
+
+function readLastCurrency(): Currency {
+  const stored = localStorage.getItem(LAST_CURRENCY_KEY);
+  return currencies.some((c) => c.value === stored) ? (stored as Currency) : 'EUR';
+}
+
 export function AddJobForm({ onAddJob }: AddJobFormProps) {
   const { t } = useLang();
   const [name, setName] = useState('');
   const [month, setMonth] = useState('');
   const [amount, setAmount] = useState('');
-  const [currency, setCurrency] = useState<Currency>('EUR');
+  // Remember the last currency the user applied (persists across launches) so
+  // they don't have to re-pick it for every job.
+  const [currency, setCurrency] = useState<Currency>(() => readLastCurrency());
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !month || !amount) return;
 
     onAddJob(name.trim(), month, parseFloat(amount), currency);
+    localStorage.setItem(LAST_CURRENCY_KEY, currency);
     setName('');
     setMonth('');
     setAmount('');
