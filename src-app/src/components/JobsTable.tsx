@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { Job, PaymentStatus } from '@/types/job';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Check, Clock, FileText, Trash2, CalendarDays, Pencil } from 'lucide-react';
+import { Check, Clock, FileText, Trash2, CalendarDays, Pencil, Receipt } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatCurrency, formatMonth } from '@/lib/format';
 import { useLang } from '@/lib/i18n';
 import { EditJobDialog } from '@/components/EditJobDialog';
+import { invoiceBridgeAvailable, sendJobToInvoice } from '@/lib/invoiceBridge';
+import { toast } from 'sonner';
 
 interface JobsTableProps {
   jobs: Job[];
@@ -42,6 +44,25 @@ export function JobsTable({ jobs, onCycleStatus, onSetStatus, onDelete, onUpdate
   const [editingInvoice, setEditingInvoice] = useState<string | null>(null);
   const [editingInvoiceMonth, setEditingInvoiceMonth] = useState<string | null>(null);
   const [editingJob, setEditingJob] = useState<Job | null>(null);
+  // Only shown inside the desktop app, where the Invoice gen bridge exists.
+  const canInvoice = invoiceBridgeAvailable();
+  const [sendingId, setSendingId] = useState<string | null>(null);
+
+  // Sends a copy of the job to Invoice gen. Deliberately changes NOTHING here:
+  // no status change, no filter or sort change, no re-selection.
+  const handleSendToInvoice = async (job: Job) => {
+    setSendingId(job.id);
+    try {
+      const res = await sendJobToInvoice(job);
+      if (res.ok) {
+        toast.success(t('invoice.sent', { name: job.name }));
+      } else {
+        toast.error(t('invoice.failed'));
+      }
+    } finally {
+      setSendingId(null);
+    }
+  };
 
   if (jobs.length === 0) {
     return (
@@ -184,6 +205,19 @@ export function JobsTable({ jobs, onCycleStatus, onSetStatus, onDelete, onUpdate
                   </td>
                   <td className="p-4 text-center">
                     <div className="flex items-center justify-center gap-1">
+                      {canInvoice && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          disabled={sendingId === job.id}
+                          onClick={() => handleSendToInvoice(job)}
+                          className="text-muted-foreground hover:text-primary"
+                          title={t('invoice.send')}
+                          aria-label={t('invoice.send')}
+                        >
+                          <Receipt className="w-4 h-4" />
+                        </Button>
+                      )}
                       <Button
                         variant="ghost"
                         size="icon"

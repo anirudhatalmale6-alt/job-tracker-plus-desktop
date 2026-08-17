@@ -54,6 +54,9 @@ const dict: Record<Lang, Record<string, string>> = {
     'actions.backup': 'Säkerhetskopiera',
     'actions.restore': 'Återställ data',
     'actions.delete': 'Ta bort jobb',
+    'invoice.send': 'Skicka till Invoice gen',
+    'invoice.sent': '"{name}" skickades till Invoice gen',
+    'invoice.failed': 'Kunde inte öppna Invoice gen. Är appen installerad?',
 
     'edit.title': 'Redigera jobb',
     'edit.desc': 'Ändra uppgifterna för jobbet och spara.',
@@ -175,6 +178,9 @@ const dict: Record<Lang, Record<string, string>> = {
     'actions.backup': 'Backup Data',
     'actions.restore': 'Restore Data',
     'actions.delete': 'Delete job',
+    'invoice.send': 'Send to Invoice gen',
+    'invoice.sent': '"{name}" sent to Invoice gen',
+    'invoice.failed': 'Could not open Invoice gen. Is the app installed?',
 
     'edit.title': 'Edit job',
     'edit.desc': 'Change the details of this job and save.',

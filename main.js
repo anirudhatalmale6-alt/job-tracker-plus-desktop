@@ -9,6 +9,7 @@
 
 const { app, BrowserWindow, protocol, net, shell, Menu, ipcMain, systemPreferences } = require('electron');
 const path = require('path');
+const fs = require('fs');
 const { pathToFileURL } = require('url');
 
 const APP_SCHEME = 'app';
@@ -142,6 +143,56 @@ ipcMain.handle('touchid:authenticate', async () => {
       return { ok: false, error: 'unavailable' };
     }
     await systemPreferences.promptTouchID('unlock Job Tracker');
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: String((e && e.message) || e) };
+  }
+});
+
+// --- Hand a job over to the Invoice gen app --------------------------------
+// The two apps are separate programs with separate storage, so the job is
+// passed through a small shared file that both can reach, and Invoice gen is
+// then launched (or focused) via its invoicegen:// URL scheme. The URL only
+// acts as a trigger; the data travels in the file, so there are no URL length
+// or escaping limits.
+//
+// This is strictly outgoing - nothing here reads or writes Job Tracker's own
+// data, so the job list, filters, sorting and statuses are never touched.
+const BRIDGE_DIR = path.join(app.getPath('appData'), 'JobTrackerInvoiceBridge');
+const BRIDGE_FILE = path.join(BRIDGE_DIR, 'handoff.json');
+
+ipcMain.handle('invoice:send-job', async (event, job) => {
+  try {
+    if (!job || typeof job !== 'object') return { ok: false, error: 'no job' };
+
+    const payload = {
+      version: 1,
+      sentAt: Date.now(),
+      jobs: [
+        {
+          name: String(job.name || ''),
+          amount: Number(job.amount) || 0,
+          currency: String(job.currency || ''),
+          month: String(job.month || ''),
+          poNumber: String(job.poNumber || ''),
+          invoiceNumber: String(job.invoiceNumber || '')
+        }
+      ]
+    };
+
+    fs.mkdirSync(BRIDGE_DIR, { recursive: true });
+    fs.writeFileSync(BRIDGE_FILE, JSON.stringify(payload), 'utf8');
+
+    // Ask macOS to open Invoice gen. If it is not installed the open fails and
+    // the renderer shows a friendly message instead of failing silently.
+    try {
+      await shell.openExternal('invoicegen://handoff');
+    } catch (openErr) {
+      // Nothing is going to collect this job, so do not leave it lying around
+      // to be picked up unexpectedly the next time Invoice gen happens to open.
+      try { fs.unlinkSync(BRIDGE_FILE); } catch (_) { /* already gone */ }
+      return { ok: false, error: String((openErr && openErr.message) || openErr) };
+    }
     return { ok: true };
   } catch (e) {
     return { ok: false, error: String((e && e.message) || e) };
