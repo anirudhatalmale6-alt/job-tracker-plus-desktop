@@ -2,17 +2,18 @@ import { useState } from 'react';
 import { Job, PaymentStatus } from '@/types/job';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Check, Clock, FileText, Trash2, CalendarDays } from 'lucide-react';
+import { Check, Clock, FileText, Trash2, CalendarDays, Pencil } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatCurrency, formatMonth } from '@/lib/format';
 import { useLang } from '@/lib/i18n';
+import { EditJobDialog } from '@/components/EditJobDialog';
 
 interface JobsTableProps {
   jobs: Job[];
   onCycleStatus: (id: string) => void;
   onSetStatus: (id: string, status: PaymentStatus) => void;
   onDelete: (id: string) => void;
-  onUpdateJob: (id: string, updates: Partial<Pick<Job, 'poNumber' | 'invoiceNumber' | 'invoiceMonth'>>) => void;
+  onUpdateJob: (id: string, updates: Partial<Job>) => void;
   recentlyChangedIds?: Set<string>;
   statusFilter?: PaymentStatus | null;
 }
@@ -40,6 +41,7 @@ export function JobsTable({ jobs, onCycleStatus, onSetStatus, onDelete, onUpdate
   const [editingPo, setEditingPo] = useState<string | null>(null);
   const [editingInvoice, setEditingInvoice] = useState<string | null>(null);
   const [editingInvoiceMonth, setEditingInvoiceMonth] = useState<string | null>(null);
+  const [editingJob, setEditingJob] = useState<Job | null>(null);
 
   if (jobs.length === 0) {
     return (
@@ -181,14 +183,28 @@ export function JobsTable({ jobs, onCycleStatus, onSetStatus, onDelete, onUpdate
                     </button>
                   </td>
                   <td className="p-4 text-center">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onDelete(job.id)}
-                      className="text-muted-foreground hover:text-destructive"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                    <div className="flex items-center justify-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setEditingJob(job)}
+                        className="text-muted-foreground hover:text-primary"
+                        title={t('edit.title')}
+                        aria-label={t('edit.title')}
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onDelete(job.id)}
+                        className="text-muted-foreground hover:text-destructive"
+                        title={t('actions.delete')}
+                        aria-label={t('actions.delete')}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </td>
                 </tr>
               );
@@ -196,6 +212,15 @@ export function JobsTable({ jobs, onCycleStatus, onSetStatus, onDelete, onUpdate
           </tbody>
         </table>
       </div>
+
+      <EditJobDialog
+        job={editingJob}
+        open={editingJob !== null}
+        onOpenChange={(open) => {
+          if (!open) setEditingJob(null);
+        }}
+        onSave={onUpdateJob}
+      />
     </div>
   );
 }

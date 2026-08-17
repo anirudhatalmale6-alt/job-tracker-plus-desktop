@@ -48,7 +48,22 @@ export function useJobs() {
     setJobs((prev) => [newJob, ...prev]);
   };
 
-  const updateJob = (id: string, updates: Partial<Pick<Job, 'poNumber' | 'invoiceNumber' | 'invoiceMonth'>>) => {
+  const updateJob = (
+    id: string,
+    updates: Partial<
+      Pick<
+        Job,
+        | 'name'
+        | 'month'
+        | 'amount'
+        | 'currency'
+        | 'status'
+        | 'poNumber'
+        | 'invoiceNumber'
+        | 'invoiceMonth'
+      >
+    >
+  ) => {
     setJobs((prev) =>
       prev.map((job) => (job.id === id ? { ...job, ...updates } : job))
     );
